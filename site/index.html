@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <script src="stomp.js"></script>
     <title>Covid reactions on Twitter</title>
     <meta
       name="viewport"
@@ -128,4 +129,33 @@
     <div id="map"></div>
     <div id="legenda">Covid reactions</div>
   </body>
+
+
+  <script>
+      //-----------------------------------------------------------------------------
+      //Script para conexão e assinatura da fila de dados
+      //-----------------------------------------------------------------------------
+
+      //tweets
+      var client_tweet = Stomp.client('ws://localhost:15674/ws');
+
+      var on_connect_tweet = function(x) {
+          id = client_tweet.subscribe("/exchange/TWEETS", function(d) {
+              data = JSON.parse(d.body);
+              console.log("data");
+              console.log(data);
+              //console.log(data[0]["sum(pontos)"]);
+
+              //textViewPlacarHome.textContent = data[0]["sum(pontos)"]; 
+          });
+      };
+      var on_error_tweet =  function() {
+      console.log('error');
+      };
+      client_tweet.connect('guest', 'guest', on_connect_tweet, on_error_tweet, '/');
+
+
+
+  </script>
+
 </html>
