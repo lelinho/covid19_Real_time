@@ -31,8 +31,8 @@ while True:
   time.sleep(random.randint(2,4))
   usuario = usuarios[random.randint(0,7)]
   tweet = tweets[random.randint(0,4)]
-  latitude = random.randint(2,3)
-  longitude = random.randint(2,3)
+  latitude = random.uniform(-24,-21)
+  longitude = random.uniform(-42,-49)
   record_tupla = (usuario, tweet, longitude, latitude)
   insert_query = """INSERT INTO tweets (username, tweet, longitude, latitude) VALUES (%s, %s, %s, %s)"""
   try:
