@@ -2,6 +2,7 @@
 #Script em Python para criar o banco de dados e alimenta-lo randomicamente
 
 import pymysql as MySQLdb
+import time
 import tweepy
 
 CONSUMER_KEY = 'iisH0BPIUtZm0shzLb42ylzeY'
