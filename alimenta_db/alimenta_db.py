@@ -2,8 +2,12 @@
 #Script em Python para criar o banco de dados e alimenta-lo randomicamente
 
 import pymysql as MySQLdb
-import random
-import time
+import tweepy
+
+CONSUMER_KEY = 'iisH0BPIUtZm0shzLb42ylzeY'
+CONSUMER_SECRET = 'yVqVBWIL8wRKUuylXRaCpzM5OoB7GT4ei5fF3WOHORJVUXxxEd'
+ACCESS_TOKEN = "14969574-cnooYvRvm2EkAEjaSQZwW5jwIuyrNj0bK2DNh8ELq"
+ACCESS_TOKEN_SECRET = "sIbW3hBxkmSLHhs6rvlRkQEYOgQmXPLEmXFwCb7QH4FF8"
 
 while True:
     try:
@@ -23,22 +27,41 @@ mycursor.execute("FLUSH PRIVILEGES;")
 db.commit()
 mycursor.close()
 
-usuarios = ["joaozinho", "zezinho", "mariazinha", "joaquim", "joão", "josé", "mário", "marcos"]
-tweets = ["Que tosse!", "Dor de garganta", "Hoje eu tomei a primeira dose da vacina", "Meu avô está internado com COVID", "Tomei a vacina!!!"]
+class IDPrinter(tweepy.Stream):
 
-while True:
-  mycursor = db.cursor()
-  time.sleep(random.randint(2,4))
-  usuario = usuarios[random.randint(0,7)]
-  tweet = tweets[random.randint(0,4)]
-  latitude = random.uniform(-24,-21)
-  longitude = random.uniform(-42,-49)
-  record_tupla = (usuario, tweet, longitude, latitude)
-  insert_query = """INSERT INTO tweets (username, tweet, longitude, latitude) VALUES (%s, %s, %s, %s)"""
-  try:
-    mycursor.execute(insert_query, record_tupla)
-  except mysql.connector.Error as error:
-    print("Failed to insert into MySQL table {}".format(error))
-  print("Inserido", flush = True)
-  db.commit()
-  mycursor.close()
+    def on_status(self, status):
+        latitude = ''
+        longitude = ''
+        
+        usuario = status.user.screen_name
+        tweet = status.text
+
+        
+        if status.coordinates:
+          #print(status.coordinates)
+          latitude = status.coordinates['coordinates'][1]
+          longitude = status.coordinates['coordinates'][0]            
+        if status.place:
+          #print(status.place.bounding_box.coordinates)
+          latitude = status.place.bounding_box.coordinates[0][0][1]
+          longitude = status.place.bounding_box.coordinates[0][0][0]
+        if latitude and longitude:
+          mycursor = db.cursor()
+          record_tupla = (usuario, tweet, longitude, latitude)
+          insert_query = """INSERT INTO tweets (username, tweet, longitude, latitude) VALUES (%s, %s, %s, %s)"""
+          try:
+            mycursor.execute(insert_query, record_tupla)
+          except mysql.connector.Error as error:
+            print("Failed to insert into MySQL table {}".format(error))
+          print("Inserido", flush = True)
+          db.commit()
+          mycursor.close()
+
+# Initialize instance of the subclass
+printer = IDPrinter(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+
+# Filter realtime Tweets by keyword
+printer.filter(track=["covid"])
+
+
+
